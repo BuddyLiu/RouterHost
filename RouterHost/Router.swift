@@ -45,7 +45,7 @@ final class Router: ObservableObject {
     
     // MARK: - Push
     /// 推入一个新页面
-    func push<V: View>(id: AnyHashable, @ViewBuilder _ builder: @escaping () -> V) {
+    func push<V: View>(id: AnyHashable, animated: Bool = true, @ViewBuilder _ builder: @escaping () -> V) {
         guard let nav = navigationController else { return }
         
         let host = AnyHostingController(
@@ -53,7 +53,7 @@ final class Router: ObservableObject {
             rootView: AnyView(builder().environmentObject(self)), // 注入 router
             router: self
         )
-        nav.pushViewController(host, animated: true)
+        nav.pushViewController(host, animated: animated)
         
         // 同步栈
         syncStackFromNav(nav)
@@ -62,27 +62,27 @@ final class Router: ObservableObject {
     
     // MARK: - Pop
     /// 弹出若干个页面
-    func pop(count: Int = 1) {
+    func pop(count: Int = 1, animated: Bool = true) {
         guard let nav = navigationController else { return }
         let vcCount = nav.viewControllers.count
         let targetIndex = max(0, vcCount - 1 - count)
         
         if targetIndex == 0 {
-            nav.popToRootViewController(animated: true)
+            nav.popToRootViewController(animated: animated)
             print("⬅️ popToRoot (count=\(count))")
         } else {
             let targetVC = nav.viewControllers[targetIndex]
-            nav.popToViewController(targetVC, animated: true)
+            nav.popToViewController(targetVC, animated: animated)
             print("⬅️ pop count=\(count)")
         }
         syncStackFromNav(nav)
     }
     
     /// 弹出到指定 id 页面
-    func pop(to id: AnyHashable) {
+    func pop(to id: AnyHashable, animated: Bool = true) {
         guard let nav = navigationController else { return }
         if let targetVC = nav.viewControllers.reversed().first(where: { ($0 as? AnyHostingController)?.id == id }) {
-            nav.popToViewController(targetVC, animated: true)
+            nav.popToViewController(targetVC, animated: animated)
             print("⬅️ pop(to: \(id))")
             syncStackFromNav(nav)
         } else {
@@ -91,16 +91,16 @@ final class Router: ObservableObject {
     }
     
     /// 弹出到根页面
-    func popToRoot() {
+    func popToRoot(animated: Bool = true) {
         guard let nav = navigationController else { return }
-        nav.popToRootViewController(animated: true)
+        nav.popToRootViewController(animated: animated)
         print("⬅️ popToRoot()")
         syncStackFromNav(nav)
     }
     
     // MARK: - Replace
     /// 替换栈顶页面，如果只有 root，则调用 replaceRoot
-    func replaceTop<V: View>(id: AnyHashable, @ViewBuilder _ builder: @escaping () -> V) {
+    func replaceTop<V: View>(id: AnyHashable, animated: Bool = true, @ViewBuilder _ builder: @escaping () -> V) {
         guard let nav = navigationController else { return }
         
         guard nav.viewControllers.count > 1 else {
@@ -112,16 +112,16 @@ final class Router: ObservableObject {
         var vcs = nav.viewControllers
         let newVC = AnyHostingController(id: id, rootView: AnyView(builder().environmentObject(self)), router: self)
         vcs[vcs.count - 1] = newVC
-        nav.setViewControllers(vcs, animated: true)
+        nav.setViewControllers(vcs, animated: animated)
         syncStackFromNav(nav)
         print("🔁 replaceTop id=\(id)")
     }
     
     /// 替换整个栈为新 root 页面
-    func replaceRoot<V: View>(id: AnyHashable, @ViewBuilder _ builder: @escaping () -> V) {
+    func replaceRoot<V: View>(id: AnyHashable, animated: Bool = true, @ViewBuilder _ builder: @escaping () -> V) {
         guard let nav = navigationController else { return }
         let newRoot = AnyHostingController(id: id, rootView: AnyView(builder().environmentObject(self)), router: self)
-        nav.setViewControllers([newRoot], animated: true)
+        nav.setViewControllers([newRoot], animated: animated)
         syncStackFromNav(nav)
         print("🔁 replaceRoot id=\(id)")
     }

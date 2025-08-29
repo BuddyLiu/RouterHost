@@ -50,10 +50,6 @@ struct HomePage: View {
             Button("Push Details (id=42)") {
                 router.push(id: 42) { DetailsPage(info: "From Home") }
             }
-            
-            Button("Replace Top with ReplacePage") {
-                router.replaceTop(id: "replaceTop") { ReplacePage() }
-            }
         }
         .padding()
     }
@@ -65,8 +61,8 @@ struct ProfilePage: View {
     var body: some View {
         VStack(spacing: 16) {
             Text("👤 Profile: \(userName)")
-            Button("Push Settings (unique UUID)") {
-                router.push(id: UUID()) { SettingsPage() }
+            Button("Push Settings (unique UUID) without animated") {
+                router.push(id: UUID(), animated: false) { SettingsPage() }
             }
             Button("Replace Top with ReplacePage") {
                 router.replaceTop(id: "replaceTop") { ReplacePage() }
@@ -109,7 +105,7 @@ struct DeepPage: View {
         VStack(spacing: 16) {
             Text("🧭 Deep Page")
             Button("Pop to id=42") { router.pop(to: 42) }
-            Button("Pop 3") { router.pop(count: 3) }
+            Button("Pop 3 without animated") { router.pop(count: 3, animated: false) }
         }
         .padding()
     }
